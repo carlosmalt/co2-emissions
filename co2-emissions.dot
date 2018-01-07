@@ -1,0 +1,23 @@
+digraph pipeline {
+  setup [shape=record,label="{setup.sh| : obtain and clean dataset}"];
+  s101 [shape=record,label="mkdir: : create data folder if it doesn't exist"];
+  setup -> s101;
+  s154 [shape=record,label="curl: : download dataset from github"];
+  setup -> s154;
+  s312 [shape=record,label="scripts/add_zeros.py: : add zeros to missing per capita column values"];
+  setup -> s312;
+  run [shape=record,label="{run.sh| : obtain n-year means}"];
+  setup -> run;
+  s109 [shape=record,label="scripts/get_mean.py: : group every n years and obtain mean over each group"];
+  run -> s109;
+  postrun [shape=record,label="{post-run.sh|series of steps required to execute the pipeline.}"];
+  run -> postrun;
+  validate [shape=record,label="{validate.sh| : validate results and get a table}"];
+  postrun -> validate;
+  s109 [shape=record,label="scripts/validate_output.py: : verify that we got actual result values"];
+  validate -> s109;
+  s201 [shape=record,label="scripts/get_mdown_table.py: : generate markdown table"];
+  validate -> s201;
+  teardown [shape=record,label="{teardown.sh|cleanup tasks.}"];
+  validate -> teardown;
+}
